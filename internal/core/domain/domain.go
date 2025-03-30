@@ -15,16 +15,23 @@ type User struct {
 	ID           string    `json:"id" db:"id"`
 	FirstName    string    `json:"first_name" db:"first_name"`
 	LastName     string    `json:"last_name" db:"last_name"`
-	Email        string    `json:"email"  null" db:"email"`
+	Email        string    `json:"email"  db:"email"`
 	Phone        string    `json:"phone,omitempty" db:"phone"`
 	PasswordHash string    `json:"-" db:"password_hash"`
 	RoleID       int       `json:"role_id" db:"role_id"`
 	Role         Role      `json:"role" db:"-"`
 	RoleName     string    `json:"role_name" db:"role_name"`
 	IsActive     bool      `json:"is_active" db:"is_active" gorm:"default:true"`
+	Token        string    `json:"token" db:"token"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
 }
+
+type UserToken struct {
+	ID           string `json:"id" db:"id"`
+	Token        string `json:"token"  db:"token"`
+}
+
 
 type Role struct {
 	ID          int       `json:"id" gorm:"primaryKey;autoIncrement"`

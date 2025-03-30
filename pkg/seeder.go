@@ -28,7 +28,7 @@ func SeedRoles(roleService ports.RoleService) {
 
 	for _, role := range roleNames {
 		if existingRoleMap[role.Name] {
-			log.Printf("Role '%s' already exists. Skipping seeding.\n", role.Name)
+			// log.Printf("Role '%s' already exists. Skipping seeding.\n", role.Name)
 			continue
 		}
 
@@ -74,7 +74,7 @@ func SeedUsers(userService ports.UserService, roleService ports.RoleService) {
 
 	for _, user := range users {
 		if existingUserMap[user.Email] {
-			log.Printf("User '%s' already exists. Skipping seeding.\n", user.Email)
+			// log.Printf("User '%s' already exists. Skipping seeding.\n", user.Email)
 			continue
 		}
 

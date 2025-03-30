@@ -59,13 +59,13 @@ func (uc *UserController) AuthenticateUser(ctx *gin.Context) {
 	}
 
 	// Generate tokens
-	accessToken, err := pkg.GenerateToken(user.Email) // Short-lived access token
+	accessToken, err := pkg.GenerateToken(user.ID) // Short-lived access token
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating access token"})
 		return
 	}
 
-	refreshToken, err := pkg.GenerateRefreshToken(user.Email) // Long-lived refresh token
+	refreshToken, err := pkg.GenerateRefreshToken(user.ID) // Long-lived refresh token
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating refresh token"})
 		return
@@ -88,7 +88,7 @@ func (uc *UserController) RefreshToken(ctx *gin.Context) {
 		return
 	}
 
-	email, err := uc.service.RefreshToken(refreshTokenRequest.RefreshToken)
+	id, err := uc.service.RefreshToken(refreshTokenRequest.RefreshToken)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message":    "Invalid credentials",
@@ -99,13 +99,13 @@ func (uc *UserController) RefreshToken(ctx *gin.Context) {
 	}
 
 	// Generate tokens
-	accessToken, err := pkg.GenerateToken(email) 
+	accessToken, err := pkg.GenerateToken(id) 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating access token"})
 		return
 	}
 
-	refreshToken, err := pkg.GenerateRefreshToken(email) 
+	refreshToken, err := pkg.GenerateRefreshToken(id) 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating refresh token"})
 		return

@@ -43,7 +43,7 @@ func InitGinRoutes(userSvc ports.UserService, roleSvc ports.RoleService, config 
 		authRoutes.GET("/verify-email/:token", userController.VerifyEmail)
 	}
 
-	userRoutes := router.Group("/api/v1/users")
+	userRoutes := router.Group("/v1/api/users")
 	{
 		userRoutes.GET("/:id", userController.GetUserByID)
 		userRoutes.GET("/", userController.ListUsers)
@@ -55,7 +55,7 @@ func InitGinRoutes(userSvc ports.UserService, roleSvc ports.RoleService, config 
 	}
 
 	// Role Routes
-	roleRoutes := router.Group("/api/v1/users/roles")
+	roleRoutes := router.Group("/v1/api/users/roles")
 	{
 		roleRoutes.POST("/", roleController.CreateRole)
 		roleRoutes.GET("/:role_name", roleController.GetRoleByName)

@@ -14,14 +14,14 @@ var (
 )
 
 // GenerateToken creates a new JWT access token
-func GenerateToken(email string) (string, error) {
+func GenerateToken(id string) (string, error) {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		return "", err
 	}
 
 	claims := jwt.MapClaims{
-		"email": email,
+		"id": id,
 		"exp":   time.Now().Add(accessTokenTTL).Unix(),
 	}
 
@@ -31,14 +31,14 @@ func GenerateToken(email string) (string, error) {
 }
 
 // GenerateRefreshToken creates a new JWT refresh token
-func GenerateRefreshToken(email string) (string, error) {
+func GenerateRefreshToken(id string) (string, error) {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		return "", err
 	}
 
 	claims := jwt.MapClaims{
-		"email": email,
+		"id": id,
 		"exp":   time.Now().Add(refreshTokenTTL).Unix(),
 	}
 
@@ -47,7 +47,7 @@ func GenerateRefreshToken(email string) (string, error) {
 	return token.SignedString([]byte(cfg.SECRET_KEY))
 }
 
-// ValidateRefreshToken validates a refresh token and returns the email
+// ValidateRefreshToken validates a refresh token and returns the id
 func ValidateRefreshToken(tokenString string) (string, error) {
 	cfg, err := config.NewConfig()
 	if err != nil {
@@ -68,10 +68,10 @@ func ValidateRefreshToken(tokenString string) (string, error) {
 		return "", errors.New("invalid refresh token payload")
 	}
 
-	// Extract email
-	email, ok := claims["email"].(string)
+	// Extract id
+	id, ok := claims["id"].(string)
 	if !ok {
-		return "", errors.New("invalid email in refresh token")
+		return "", errors.New("invalid id in refresh token")
 	}
 
 	// Extract expiration and check if it's expired
@@ -85,5 +85,5 @@ func ValidateRefreshToken(tokenString string) (string, error) {
 		return "", errors.New("refresh token has expired")
 	}
 
-	return email, nil
+	return id, nil
 }
