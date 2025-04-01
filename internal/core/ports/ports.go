@@ -2,7 +2,6 @@ package ports
 
 import "github.com/AntonyIS-chain/lost-found-user-service/internal/core/domain"
 
-
 type UserService interface {
 	RegisterUser(user domain.User) (domain.User, error)
 	AuthenticateUser(email, password string) (domain.User, error)
@@ -19,15 +18,6 @@ type UserService interface {
 	ForgotPassword(email string) error
 	ResetPassword(token, newPassword string) error
 	VerifyEmail(token string) error
-}
-
-type RoleService interface {
-	CreateRole(role domain.Role) (domain.Role, error)
-	GetRoleByName(roleName string) (domain.Role, error)
-	ListRoles() ([]domain.Role, error)
-	UpdateRole(roleID int, updates domain.Role) error
-	DeleteRole(roleID int) error
-	AssignRoleToUser(userID string, roleName string) error
 }
 
 type UserRepository interface {
@@ -48,6 +38,15 @@ type UserRepository interface {
 }
 
 type RoleRepository interface {
+	CreateRole(role domain.Role) (domain.Role, error)
+	GetRoleByName(roleName string) (domain.Role, error)
+	ListRoles() ([]domain.Role, error)
+	UpdateRole(roleID int, updates domain.Role) error
+	DeleteRole(roleID int) error
+	AssignRoleToUser(userID string, roleName string) error
+}
+
+type RoleService interface {
 	CreateRole(role domain.Role) (domain.Role, error)
 	GetRoleByName(roleName string) (domain.Role, error)
 	ListRoles() ([]domain.Role, error)

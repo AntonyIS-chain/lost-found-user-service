@@ -28,10 +28,9 @@ type User struct {
 }
 
 type UserToken struct {
-	ID           string `json:"id" db:"id"`
-	Token        string `json:"token"  db:"token"`
+	UserID string `json:"user_id" db:"user_id"`
+	Token  string `json:"token"  db:"token"`
 }
-
 
 type Role struct {
 	ID          int       `json:"id" gorm:"primaryKey;autoIncrement"`

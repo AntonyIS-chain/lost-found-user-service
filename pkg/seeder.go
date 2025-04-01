@@ -77,7 +77,6 @@ func SeedUsers(userService ports.UserService, roleService ports.RoleService) {
 			// log.Printf("User '%s' already exists. Skipping seeding.\n", user.Email)
 			continue
 		}
-
 		createdUser, err := userService.RegisterUser(user)
 		if err != nil {
 			log.Printf("Failed to create user %s: %v", user.Email, err)

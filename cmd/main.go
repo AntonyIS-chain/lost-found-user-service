@@ -7,7 +7,6 @@ import (
 	app "github.com/AntonyIS-chain/lost-found-user-service/internal/adapters/app/handlers"
 	"github.com/AntonyIS-chain/lost-found-user-service/internal/adapters/repository/postgresDB"
 	"github.com/AntonyIS-chain/lost-found-user-service/internal/core/services"
-	"github.com/AntonyIS-chain/lost-found-user-service/pkg"
 )
 
 func RunService() {
@@ -28,8 +27,8 @@ func RunService() {
 	usersService := services.NewUserManagementService(dbClient, rolesService)
 
 	// Seed "User Admin" role
-	pkg.SeedRoles(rolesService)
-	pkg.SeedUsers(usersService, rolesService)
+	// pkg.SeedRoles(rolesService)
+	// pkg.SeedUsers(usersService, rolesService)
 
 	// Start HTTP server with initialized services
 	app.InitGinRoutes(usersService, rolesService, conf)
