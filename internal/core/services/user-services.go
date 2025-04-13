@@ -7,7 +7,6 @@ import (
 	"github.com/AntonyIS-chain/lost-found-user-service/internal/core/domain"
 	"github.com/AntonyIS-chain/lost-found-user-service/internal/core/ports"
 	"github.com/AntonyIS-chain/lost-found-user-service/pkg"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -22,32 +21,6 @@ func NewUserManagementService(repo ports.UserRepository, roleService ports.RoleS
 		repo:        repo,
 		roleService: roleService,
 	}
-}
-
-// Implement UserService interface
-func (s *UserManagementService) RegisterUser(user domain.User) (domain.User, error) {
-	// Check if user already exists by email
-	existingUser, err := s.repo.GetUserByEmail(user.Email)
-	if err == nil && existingUser.ID != "" {
-		return domain.User{}, fmt.Errorf("user with email '%s' already exists", user.Email)
-	}
-
-	// Get role by name
-	role, err := s.roleService.GetRoleByName(user.RoleName)
-	if err != nil || role.ID == 0 {
-		return domain.User{}, fmt.Errorf("role '%s' does not exist", user.RoleName)
-	}
-
-	// Assign RoleID instead of Role struct
-	userId := uuid.New().String()
-	user.ID = userId
-	user.RoleID = role.ID
-
-	return s.repo.RegisterUser(user)
-}
-
-func (s *UserManagementService) AuthenticateUser(email, password string) (domain.User, error) {
-	return s.repo.AuthenticateUser(email, password)
 }
 
 func (s *UserManagementService) GetUserByID(userID string) (domain.User, error) {
@@ -115,20 +88,6 @@ func (s *UserManagementService) ChangePassword(userID string, oldPassword, newPa
 	return s.repo.ChangePassword(userID, oldPassword, newPassword)
 }
 
-func (s *UserManagementService) ForgotPassword(email string) error {
-	return s.repo.ForgotPassword(email)
-}
-
-func (s *UserManagementService) ResetPassword(token, newPassword string) error {
-	email, err := pkg.ValidateRefreshToken(token)
-
-	if err != nil {
-		return err
-	}
-
-	return s.repo.ResetPassword(email, newPassword)
-}
-
-func (s *UserManagementService) VerifyEmail(token string) error {
-	return s.repo.VerifyEmail(token)
-}
+// func (s *UserManagementService) VerifyEmail(token string) error {
+// 	return s.repo.VerifyEmail(token)
+// }

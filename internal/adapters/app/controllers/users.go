@@ -5,7 +5,6 @@ import (
 
 	"github.com/AntonyIS-chain/lost-found-user-service/internal/core/domain"
 	"github.com/AntonyIS-chain/lost-found-user-service/internal/core/ports"
-	"github.com/AntonyIS-chain/lost-found-user-service/pkg"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,107 +14,6 @@ type UserController struct {
 
 func NewUserController(service ports.UserService) *UserController {
 	return &UserController{service: service}
-}
-
-func (uc *UserController) RegisterUser(ctx *gin.Context) {
-	var user domain.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message":    "Bad request",
-			"success":    false,
-			"statusCode": 400,
-		})
-		return
-	}
-
-	createdUser, err := uc.service.RegisterUser(user)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, createdUser)
-}
-
-func (uc *UserController) AuthenticateUser(ctx *gin.Context) {
-	var loginRequest struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-
-	if err := ctx.ShouldBindJSON(&loginRequest); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	user, err := uc.service.AuthenticateUser(loginRequest.Email, loginRequest.Password)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message":    "Invalid email or password",
-			"success":    false,
-			"statusCode": 401,
-		})
-		return
-	}
-
-	// Generate tokens
-	accessToken, err := pkg.GenerateToken(user.ID) // Short-lived access token
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating access token"})
-		return
-	}
-
-	refreshToken, err := pkg.GenerateRefreshToken(user.ID) // Long-lived refresh token
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating refresh token"})
-		return
-	}
-
-	// Return tokens
-	ctx.JSON(http.StatusOK, gin.H{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-	})
-}
-
-func (uc *UserController) RefreshToken(ctx *gin.Context) {
-	var refreshTokenRequest struct {
-		RefreshToken string `json:"refresh_token"`
-	}
-
-	if err := ctx.ShouldBindJSON(&refreshTokenRequest); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	id, err := uc.service.RefreshToken(refreshTokenRequest.RefreshToken)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message":    "Invalid credentials",
-			"success":    false,
-			"statusCode": 401,
-		})
-		return
-	}
-
-	// Generate tokens
-	accessToken, err := pkg.GenerateToken(id) 
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating access token"})
-		return
-	}
-
-	refreshToken, err := pkg.GenerateRefreshToken(id) 
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating refresh token"})
-		return
-	}
-
-	// Return tokens
-	ctx.JSON(http.StatusOK, gin.H{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-	})
 }
 
 func (uc *UserController) GetUserByID(ctx *gin.Context) {
@@ -223,47 +121,12 @@ func (uc *UserController) ChangePassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
 }
 
-func (uc *UserController) ForgotPassword(ctx *gin.Context) {
-	var req struct {
-		Email string `json:"email"`
-	}
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// func (uc *UserController) VerifyEmail(ctx *gin.Context) {
+// 	token := ctx.Param("token")
+// 	if err := uc.service.VerifyEmail(token); err != nil {
+// 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	if err := uc.service.ForgotPassword(req.Email); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"message": "Password reset link sent"})
-}
-
-func (uc *UserController) ResetPassword(ctx *gin.Context) {
-	var req struct {
-		Token       string `json:"token"`
-		NewPassword string `json:"new_password"`
-	}
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := uc.service.ResetPassword(req.Token, req.NewPassword); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
-}
-
-func (uc *UserController) VerifyEmail(ctx *gin.Context) {
-	token := ctx.Param("token")
-	if err := uc.service.VerifyEmail(token); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"message": "Email verified successfully"})
-}
+// 	ctx.JSON(http.StatusOK, gin.H{"message": "Email verified successfully"})
+// }

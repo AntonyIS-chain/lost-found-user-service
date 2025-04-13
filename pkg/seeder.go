@@ -15,10 +15,9 @@ func SeedRoles(roleService ports.RoleService) {
 	}
 
 	roleNames := []domain.Role{
-		{Name: "User Admin", Description: "Administrator with full access to the system"},
+		{Name: "Administrator", Description: "Administrator with full access to the system"},
 		{Name: "Moderator", Description: "Can moderate user content"},
-		{Name: "Registered User", Description: "Standard user with basic privileges"},
-		{Name: "Guest User", Description: "Limited access user"},
+		{Name: "Guest", Description: "Limited access user"},
 	}
 
 	existingRoleMap := make(map[string]bool)
@@ -42,7 +41,9 @@ func SeedRoles(roleService ports.RoleService) {
 	log.Println("Successfully seeded all roles.")
 }
 
-func SeedUsers(userService ports.UserService, roleService ports.RoleService) {
+// SeedUsers populates the database with initial users and roles
+func SeedDB(authService ports.AuthService, userService ports.UserService, roleService ports.RoleService) {
+	SeedRoles(roleService)
 	existingUsers, err := userService.ListUsers()
 	if err != nil {
 		log.Printf("Failed to fetch users: %v", err)
@@ -60,34 +61,37 @@ func SeedUsers(userService ports.UserService, roleService ports.RoleService) {
 		return
 	}
 
-	var roleMap = make(map[string]int)
+	roleMap := make(map[string]int)
 	for _, role := range existingRoles {
 		roleMap[role.Name] = role.ID
 	}
 
 	users := []domain.User{
-		{FirstName: "Admin", LastName: "User", Email: "admin@example.com", PasswordHash: "Admin@123", RoleID: roleMap["User Admin"], RoleName: "User Admin"},
-		{FirstName: "Moderator", LastName: "User", Email: "moderator@example.com", PasswordHash: "Moderator@123", RoleID: roleMap["Moderator"], RoleName: "Moderator"},
-		{FirstName: "John", LastName: "Doe", Email: "user@example.com", PasswordHash: "User@123", RoleID: roleMap["Registered User"], RoleName: "Registered User"},
-		{FirstName: "Guest", LastName: "User", Email: "guest@example.com", PasswordHash: "Guest@123", RoleID: roleMap["Guest User"], RoleName: "Guest User"},
+		{FirstName: "John", LastName: "Doe", Email: "admin@example.com", RoleName: "Administrator", Phone: "+254723308900"},
+		{FirstName: "Mark", LastName: "Tess", Email: "moderator@example.com", RoleName: "Moderator", Phone: "+254723308900"},
+		{FirstName: "Mike", LastName: "Tesla", Email: "guest@example.com", RoleName: "Guest", Phone: "+254723308900"},
 	}
 
 	for _, user := range users {
 		if existingUserMap[user.Email] {
-			// log.Printf("User '%s' already exists. Skipping seeding.\n", user.Email)
 			continue
 		}
-		createdUser, err := userService.RegisterUser(user)
+
+		// Validate role existence
+		roleID, exists := roleMap[user.RoleName]
+		if !exists {
+			log.Printf("Role '%s' not found. Skipping user %s.\n", user.RoleName, user.Email)
+			continue
+		}
+		user.RoleID = roleID
+		user.PasswordHash = "Password@1234"
+
+		_, err := authService.SignUp(user)
 		if err != nil {
 			log.Printf("Failed to create user %s: %v", user.Email, err)
 			continue
 		}
 
-		err = roleService.AssignRoleToUser(createdUser.ID, user.RoleName)
-		if err != nil {
-			log.Printf("Failed to assign role to user %s: %v", user.Email, err)
-			continue
-		}
 	}
 
 	log.Println("Successfully seeded all users and assigned roles.")

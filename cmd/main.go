@@ -5,8 +5,9 @@ import (
 
 	"github.com/AntonyIS-chain/lost-found-user-service/config"
 	app "github.com/AntonyIS-chain/lost-found-user-service/internal/adapters/app/handlers"
-	"github.com/AntonyIS-chain/lost-found-user-service/internal/adapters/repository/postgresDB"
+	"github.com/AntonyIS-chain/lost-found-user-service/internal/adapters/repository"
 	"github.com/AntonyIS-chain/lost-found-user-service/internal/core/services"
+	"github.com/AntonyIS-chain/lost-found-user-service/pkg"
 )
 
 func RunService() {
@@ -17,19 +18,23 @@ func RunService() {
 	}
 
 	// Initialize database client
-	dbClient, err := postgresDB.NewPostgresDBClient(conf)
+	dbClient, err := repository.NewPostgresDBClient(conf)
 	if err != nil {
 		log.Fatalf("Failed to initialize database client: %v", err)
 	}
 
-	// Initialize services
-	rolesService := services.NewRoleManagementService(dbClient)
-	usersService := services.NewUserManagementService(dbClient, rolesService)
+	authRepo := repository.AuthRepository(dbClient)
+	roleRepo := repository.NewRoleRepository(dbClient)
+	userRepo := repository.NewUserRepository(dbClient)
 
-	// Seed "User Admin" role
-	// pkg.SeedRoles(rolesService)
-	// pkg.SeedUsers(usersService, rolesService)
+	// Initialize services
+
+	rolesService := services.NewRoleManagementService(roleRepo)
+	authService := services.NewAuthManagementService(authRepo, rolesService)
+	usersService := services.NewUserManagementService(userRepo, rolesService)
+
+	pkg.SeedDB(authService, usersService, rolesService)
 
 	// Start HTTP server with initialized services
-	app.InitGinRoutes(usersService, rolesService, conf)
+	app.InitGinRoutes(authService, usersService, rolesService, conf)
 }

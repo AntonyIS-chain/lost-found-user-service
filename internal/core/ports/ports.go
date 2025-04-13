@@ -3,8 +3,6 @@ package ports
 import "github.com/AntonyIS-chain/lost-found-user-service/internal/core/domain"
 
 type UserService interface {
-	RegisterUser(user domain.User) (domain.User, error)
-	AuthenticateUser(email, password string) (domain.User, error)
 	GetUserByID(userID string) (domain.User, error)
 	GetUserByEmail(email string) (domain.User, error)
 	ListUsers() ([]domain.User, error)
@@ -15,14 +13,10 @@ type UserService interface {
 	RefreshToken(refresh_token string) (string, error)
 	AssignRole(userID string, roleID string) error
 	ChangePassword(userID string, oldPassword, newPassword string) error
-	ForgotPassword(email string) error
-	ResetPassword(token, newPassword string) error
-	VerifyEmail(token string) error
+	// VerifyEmail(token string) error
 }
 
 type UserRepository interface {
-	RegisterUser(user domain.User) (domain.User, error)
-	AuthenticateUser(email, password string) (domain.User, error)
 	GetUserByID(userID string) (domain.User, error)
 	GetUserByEmail(email string) (domain.User, error)
 	ListUsers() ([]domain.User, error)
@@ -32,9 +26,7 @@ type UserRepository interface {
 	Activate(userID string) error
 	AssignRole(userID string, roleID string) error
 	ChangePassword(userID string, oldPassword, newPassword string) error
-	ForgotPassword(email string) error
-	ResetPassword(userID, newPassword string) error
-	VerifyEmail(token string) error
+	// VerifyEmail(token string) error
 }
 
 type RoleRepository interface {
@@ -61,4 +53,18 @@ type LoggingService interface {
 	LogInfo(LogEntry domain.LogMessage)
 	LogWarning(LogEntry domain.LogMessage)
 	LogError(LogEntry domain.LogMessage)
+}
+
+type AuthService interface {
+	SignIn(email, password string) (domain.SessionResponse, error)
+	SignUp(user domain.User) (domain.SessionResponse, error)
+	ForgotPassword(email string) (domain.SessionResponse, error)
+	ResetPassword(omail, oldPassword, newPassword string) (domain.SessionResponse, error)
+}
+
+type AuthRepository interface {
+	SignIn(email, password string) (domain.User, error)
+	SignUp(user domain.User) (domain.User, error)
+	ForgotPassword(email string) (domain.User, error)
+	ResetPassword(omail, oldPassword, newPassword string) (domain.User, error)
 }

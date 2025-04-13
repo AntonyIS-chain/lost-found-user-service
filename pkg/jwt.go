@@ -14,7 +14,7 @@ var (
 )
 
 // GenerateToken creates a new JWT access token
-func GenerateToken(id string) (string, error) {
+func GenerateToken(id, role string) (string, error) {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		return "", err
@@ -22,6 +22,7 @@ func GenerateToken(id string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"id": id,
+		"role": role,
 		"exp":   time.Now().Add(accessTokenTTL).Unix(),
 	}
 
@@ -31,7 +32,7 @@ func GenerateToken(id string) (string, error) {
 }
 
 // GenerateRefreshToken creates a new JWT refresh token
-func GenerateRefreshToken(id string) (string, error) {
+func GenerateRefreshToken(id, role string) (string, error) {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		return "", err
@@ -39,6 +40,7 @@ func GenerateRefreshToken(id string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"id": id,
+		"role": role,
 		"exp":   time.Now().Add(refreshTokenTTL).Unix(),
 	}
 

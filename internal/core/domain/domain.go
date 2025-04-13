@@ -17,17 +17,17 @@ type User struct {
 	LastName     string    `json:"last_name" db:"last_name"`
 	Email        string    `json:"email"  db:"email"`
 	Phone        string    `json:"phone,omitempty" db:"phone"`
-	PasswordHash string    `json:"-" db:"password_hash"`
+	PasswordHash string    `json:"-" db:"password"`
 	RoleID       int       `json:"role_id" db:"role_id"`
 	Role         Role      `json:"role" db:"-"`
 	RoleName     string    `json:"role_name" db:"role_name"`
 	IsActive     bool      `json:"is_active" db:"is_active" gorm:"default:true"`
-	Token        string    `json:"token" db:"token"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
 }
 
 type UserToken struct {
+	ID string `json:"id" db:"id"`
 	UserID string `json:"user_id" db:"user_id"`
 	Token  string `json:"token"  db:"token"`
 }
@@ -70,3 +70,18 @@ type ResetPasswordToken struct {
 	ExpiresAt time.Time `json:"expires_at"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+
+type SessionUser struct {
+	ID string `json:"user_id"`
+	Role string `json:"role"`
+}
+
+type SessionResponse struct {
+	AccessToken string  `json:"access_token"`
+	RefreshToken string  `json:"refresh_token"`
+	TokenType string  `json:"token_type"`
+	ExpiresIn int `json:"expires_in"`
+	User  SessionUser `json:"session_user"`
+}
+

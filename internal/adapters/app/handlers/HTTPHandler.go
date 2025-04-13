@@ -8,11 +8,12 @@ import (
 	"github.com/AntonyIS-chain/lost-found-user-service/config"
 	"github.com/AntonyIS-chain/lost-found-user-service/internal/adapters/app/controllers"
 	"github.com/AntonyIS-chain/lost-found-user-service/internal/core/ports"
+	"github.com/AntonyIS-chain/lost-found-user-service/internal/core/services"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func InitGinRoutes(userSvc ports.UserService, roleSvc ports.RoleService, config *config.Config) {
+func InitGinRoutes(authSvc *services.AuthManagementService,userSvc ports.UserService, roleSvc ports.RoleService, config *config.Config) {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
@@ -28,19 +29,17 @@ func InitGinRoutes(userSvc ports.UserService, roleSvc ports.RoleService, config 
 	}))
 
 	// Initialize Controllers
+	authController := controllers.NewAuthController(authSvc)
 	userController := controllers.NewUserController(userSvc)
 	roleController := controllers.NewRoleController(roleSvc, userSvc)
 
 	// User Routes
-	authRoutes := router.Group("/api/v1/auth")
+	authRoutes := router.Group("/v1/auth")
 	{
-		authRoutes.POST("/register", userController.RegisterUser)
-		authRoutes.POST("/login", userController.AuthenticateUser)
-		authRoutes.POST("/refresh-token", userController.RefreshToken)
-		authRoutes.POST("/:id/change-password", userController.ChangePassword)
-		authRoutes.POST("/forgot-password", userController.ForgotPassword)
-		authRoutes.POST("/reset-password", userController.ResetPassword)
-		authRoutes.GET("/verify-email/:token", userController.VerifyEmail)
+		authRoutes.POST("/signup", authController.SignUp)
+		authRoutes.POST("/signin", authController.SignIn)
+		authRoutes.POST("/forgot-password", authController.ForgotPassword)
+		authRoutes.POST("/reset-password", authController.ResetPassword)
 	}
 
 	userRoutes := router.Group("/v1/api/users")
